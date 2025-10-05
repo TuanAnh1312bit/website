@@ -1,0 +1,594 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>DeviceHub — Nhóm 6</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+<style>
+  :root{--bg1:#0f172a;--bg2:#071025;--card:#f8fafc;--muted:#94a3b8;--accent1:#7c3aed;--accent2:#06b6d4}
+  html,body,#root{height:100%}
+  body{font-family:Inter,system-ui,Arial;background:linear-gradient(180deg,#f8fbff 0%, #eef6ff 40%);margin:0;color:#0f172a;min-height:100%}
+  body.dark{background:linear-gradient(180deg,var(--bg2),#042033);color:#e6eef6}
+  .container{max-width:1100px;margin:0 auto;padding:28px}
+  .card{background:rgba(255,255,255,0.8);backdrop-filter:blur(6px);padding:1rem;border-radius:14px;border:1px solid rgba(124,58,237,0.08);box-shadow:0 8px 30px rgba(15,23,42,0.06);transition:transform .22s ease,box-shadow .22s ease}
+  body.dark .card{background:linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.01));border:1px solid rgba(255,255,255,0.04)}
+  .card:hover{transform:translateY(-8px);box-shadow:0 26px 50px rgba(2,6,23,0.18)}
+  .btn{background:linear-gradient(90deg,var(--accent1),var(--accent2));color:white;padding:.65rem 1.2rem;border-radius:12px;font-weight:700;letter-spacing:.2px;border:none;box-shadow:0 6px 20px rgba(6,182,212,0.12);transition:transform .18s ease,filter .18s ease}
+  .btn:hover{transform:translateY(-4px) scale(1.02);filter:brightness(1.06);box-shadow:0 18px 40px rgba(124,58,237,0.14)}
+  .muted{color:var(--muted)}
+  .tag{padding:.28rem .6rem;border-radius:999px;border:1px solid rgba(15,23,42,0.06);font-size:.8rem;background:linear-gradient(180deg,rgba(255,255,255,0.6),rgba(255,255,255,0.4))}
+  .avatar{width:72px;height:72px;border-radius:12px;object-fit:cover}
+  .interactive{transition:all .18s ease;cursor:pointer;border-radius:10px}
+  .interactive:hover{transform:translateY(-8px);box-shadow:0 18px 36px rgba(2,6,23,0.12)}
+  .hero-video{width:420px;height:240px;border-radius:14px;object-fit:cover;box-shadow:0 18px 40px rgba(2,6,23,0.08)}
+  .gallery img{width:140px;height:96px;object-fit:cover;border-radius:12px;transition:transform .18s ease,box-shadow .18s ease}
+  .gallery img:hover{transform:translateY(-8px) scale(1.04);box-shadow:0 18px 40px rgba(2,6,23,0.12)}
+  .nav-btn{padding:.5rem .8rem;border-radius:10px;border:1px solid rgba(2,6,23,0.04);background:transparent}
+  .nav-btn:hover{background:linear-gradient(90deg, rgba(124,58,237,0.06), rgba(6,182,212,0.04))}
+  .score-badge{background:linear-gradient(90deg,#ffd166,#ff6b6b);padding:.4rem .7rem;border-radius:999px;color:#08122a;font-weight:700}
+  @media (max-width:880px){ .hero-video{width:100%;height:190px} .gallery img{width:96px;height:64px} .container{padding:16px} }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<!-- React + Babel UMD -->
+<script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+<script type="text/babel">
+const { useState, useEffect } = React;
+
+/* Utilities */
+function shuffle(arr){ return [...arr].sort(()=>Math.random()-0.5); }
+function downloadFile(filename, content, mime='text/plain'){ const blob = new Blob([content], {type: mime}); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = filename; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url); }
+
+/* App data (editable) */
+const TEAM_NAME = 'NHÓM 6';
+const CONTACT = {
+  phone: '0911110970',
+  address: 'THPT Hiệp Hòa số 1',
+  email: 'ntanh131228@gmail.com'
+};
+
+const MEMBERS = [
+  {name:'Tuấn Anh', role:'Nhóm trưởng & Dev chính', bio:'Quản lý dự án, kiêm dev chính - đảm nhiệm kiến trúc và triển khai frontend.'},
+  {name:'Quỳnh Anh', role:'Dev Frontend', bio:'Xây dựng giao diện, tối ưu trải nghiệm người dùng.'},
+  {name:'Thùy Trang', role:'Nội dung & Tài liệu', bio:'Soạn cheatsheet, biên tập tài liệu học tập.'},
+  {name:'Hà An', role:'QA & Kiểm thử', bio:'Kiểm thử chức năng, đảm bảo hoạt động mượt mà.'},
+  {name:'Thanh Bình', role:'Multimedia', bio:'Thiết kế ảnh, video minh họa.'},
+  {name:'Lê Ánh', role:'Hỗ trợ kỹ thuật', bio:'Hỗ trợ triển khai, xử lý sự cố kỹ thuật.'}
+];
+
+const ARTICLES = [
+  { slug:'hd-bluetooth', title:'Hướng dẫn cơ bản về Bluetooth', href:'#/articles/hd-bluetooth', summary:'Giải thích cách hoạt động và lưu ý khi chia sẻ file', content:`Bluetooth là giao thức truyền dữ liệu không dây tầm ngắn, hoạt động ở băng tần 2.4GHz.
+
+Các bước kết nối cơ bản:
+1) Bật Bluetooth trên cả hai thiết bị.
+2) Đảm bảo thiết bị ở chế độ Discoverable.
+3) Trên thiết bị gửi: chọn file → Share → Bluetooth → chọn thiết bị nhận.
+4) Trên thiết bị nhận: chấp nhận yêu cầu và nhập mã ghép đôi nếu được hỏi.
+
+Mẹo tối ưu: giữ khoảng cách <5m, tắt các thiết bị gây nhiễu, cập nhật driver/firmware.` },
+  { slug:'meo-windows', title:'Mẹo tối ưu kết nối trên Windows', href:'#/articles/meo-windows', summary:'Các bước gỡ lỗi khi Bluetooth không hiện thiết bị', content:`Khi Bluetooth trên Windows không hiển thị:
+- Kiểm tra Device Manager → Bluetooth drivers.
+- Bật/tắt chế độ Airplane mode.
+- Khởi động lại dịch vụ Bluetooth Support Service.
+- Dùng Troubleshoot (Settings → Update & Security → Troubleshoot).
+
+Nếu vẫn không được, thử cập nhật driver từ trang nhà sản xuất.` },
+  { slug:'airdrops-vs-bluetooth', title:'So sánh AirDrop và Bluetooth', href:'#/articles/airdrops-vs-bluetooth', summary:'Khi nào nên dùng AirDrop, cáp hoặc dịch vụ đám mây.', content:`AirDrop là giải pháp của Apple, cực nhanh trên hệ sinh thái iOS/macOS và sử dụng cả Wi‑Fi Direct lẫn Bluetooth để thiết lập kết nối.
+
+So sánh nhanh:
+- AirDrop: nhanh, ổn định trên Apple → dùng cho file lớn giữa iPhone/Mac.
+- Bluetooth: tầm ngắn, chậm hơn → phù hợp file nhỏ.
+- Cáp/USB-C: ổn định nhất cho file lớn/đòi hỏi tốc độ.
+- Cloud: tốt khi cần chia sẻ nhiều người và không ở cùng vị trí.` }
+];
+
+const DOCS = [
+  {id:'d1', title:'HuongDan_KetNoi_PC_DienThoai.doc', content:`HƯỚNG DẪN KẾT NỐI MÁY TÍNH VÀ ĐIỆN THOẠI
+
+1. Tổng quan
+Mục tiêu: truyền file, chia sẻ màn hình, debug, và sao lưu dữ liệu.
+
+2. Kết nối qua cáp USB (Android - Windows)\- Dùng cáp USB-C/USB-A tùy máy.\- Trên điện thoại: chọn chế độ File Transfer / MTP.\- Trên Windows: thiết bị sẽ xuất hiện trong File Explorer.
+
+3. Kết nối iPhone - Windows\- Dùng cáp Lightning to USB hoặc iCloud / Google Photos.\- Cài iTunes hoặc mở Photos để import hình.
+
+4. Kết nối qua Wi‑Fi (Wi‑Fi Direct / Apps)\- Sử dụng ứng dụng: ShareIt, Feem, Snapdrop, hoặc SMB for advanced.\- Ưu điểm: nhanh hơn Bluetooth, phù hợp file lớn.
+
+5. Kết nối qua Bluetooth\- Dùng cho file nhỏ và thiết bị ngoại vi.\- Bật Bluetooth, ghép đôi, chấp nhận truyền file.
+
+6. Khắc phục sự cố cơ bản\- Kiểm tra cáp, driver, chế độ truyền trên điện thoại, bật quyền truy cập file, thử cổng khác.
+
+7. Mẹo & bảo mật\- Tắt discoverable sau khi ghép đôi, dùng mật khẩu/ mã PIN khi được yêu cầu.`, size:'38KB', desc:'Hướng dẫn đầy đủ kết nối PC và điện thoại (Android & iPhone).', tags:['ket-noi','pc','dien-thoai','doc']},
+  {id:'d2', title:'ThietBi_ThongDung.doc', content:`TÌM HIỂU CÁC THIẾT BỊ SỐ THÔNG DỤNG
+
+1. Laptop/PC: CPU, RAM, SSD/HDD, GPU, mainboard.
+2. Thiết bị ngoại vi: chuột, bàn phím, tai nghe, webcam, máy in.
+3. Các thiết bị di động: smartphone (Android/iOS), tablet.
+4. Mạng & truyền thông: router, modem, switch, USB dongle.
+
+Mẹo nhận biết và chọn thiết bị phù hợp cho học tập: RAM tối thiểu 8GB, SSD cho tốc độ, màn hình IPS cho học lâu.`, size:'28KB', desc:'Tổng hợp các thiết bị số phổ biến và cách chọn mua.', tags:['thiet-bi','doc']},
+  {id:'d3', title:'ChuyenFile_PhuHop.doc', content:`PHƯƠNG PHÁP CHUYỂN FILE PHÙ HỢP
+
+1. Nhỏ (dưới 10MB): Bluetooth hoặc gửi qua email.
+2. Trung bình (10-200MB): Wi‑Fi Direct, cáp USB hoặc ứng dụng ShareIt/Snapdrop.
+3. Lớn (>200MB): cáp USB, External SSD, hoặc dịch vụ cloud (Google Drive/OneDrive).
+
+Hướng dẫn từng bước cho mỗi phương pháp, ưu nhược điểm và mẹo tăng tốc truyền file.`, size:'22KB', desc:'Hướng dẫn chọn phương pháp chuyển file theo kích thước.', tags:['file','doc']},
+  {id:'d4', title:'Lab_Exercises.doc', content:`BỘ BÀI TẬP THỰ HÀNH KẾT NỐI
+
+Bài 1: Ghép đôi Bluetooth và mô tả các bước từng bước.
+Bài 2: Gửi ảnh 50MB từ Android sang Windows bằng Wi‑Fi transfer và ghi lại thời gian.
+Bài 3: Kết nối iPhone với Windows bằng cáp Lightning, import ảnh.
+Bài 4: Khắc phục lỗi "Device not recognized" trên Windows khi cắm cáp.
+
+Đáp án gợi ý và checklist kỹ thuật kèm theo.`, size:'44KB', desc:'Bộ bài tập thực hành chi tiết (dạng doc).', tags:['lab','doc']}
+];
+
+/* App */
+function App(){
+  const [route,setRoute] = useState(window.location.hash.slice(1) || '/');
+  const [dark, setDark] = useState(localStorage.getItem('dh_dark') === '1');
+  useEffect(()=>{ document.body.classList.toggle('dark', dark); }, [dark]);
+  useEffect(()=>{ const onHash=()=> setRoute(window.location.hash.slice(1) || '/'); window.addEventListener('hashchange', onHash); return ()=> window.removeEventListener('hashchange', onHash); }, []);
+  function nav(to){ window.location.hash = to; }
+  return (
+    <div className="p-6 max-w-6xl mx-auto">
+      <header className="flex items-center justify-between mb-6">
+        <div className="flex items-center gap-4">
+          <div style={{background:'linear-gradient(135deg,#7c3aed,#06b6d4)',padding:10,borderRadius:12,color:'#fff',fontWeight:800}}>DG</div>
+          <div>
+            <div className="font-bold text-xl">DeviceHub <span className="text-sm text-indigo-600">— {TEAM_NAME}</span></div>
+            <div className="text-sm muted">Học qua trò chơi & Thiết bị — Bản dựng chuyên nghiệp hơn</div>
+          </div>
+        </div>
+        <div className="flex items-center gap-3">
+          <button className="px-3 py-2 border rounded" onClick={()=>{ setDark(d=>{ localStorage.setItem('dh_dark', d? '0':'1'); return !d; }); }} aria-label="Toggle theme">{dark? '🌙':'☀️'}</button>
+          <nav className="hidden sm:flex gap-2" aria-label="Main navigation">
+            <button onClick={()=>nav('/')} className="px-3 py-2 rounded border interactive">Trang chủ</button>
+            <button onClick={()=>nav('/games')} className="px-3 py-2 rounded border interactive">Trò chơi</button>
+            <button onClick={()=>nav('/guides')} className="px-3 py-2 rounded border interactive">Hướng dẫn</button>
+            <button onClick={()=>nav('/resources')} className="px-3 py-2 rounded border interactive">Tài liệu</button>
+            <button onClick={()=>nav('/team')} className="px-3 py-2 rounded border interactive">Nhóm</button>
+            <button onClick={()=>nav('/articles')} className="px-3 py-2 rounded border interactive">Bài viết</button>
+          </nav>
+        </div>
+      </header>
+
+      {route === '/' && <Home nav={nav} />}
+      {route === '/games' && <Games />}
+      {route === '/guides' && <Guides />}
+      {route === '/resources' && <Resources />}
+      {route === '/team' && <TeamPage />}
+      {route === '/articles' && <Articles />}
+      {route.startsWith('/articles/') && <ArticleDetail slug={route.replace('/articles/','')} />}
+
+      <footer className="text-sm muted mt-8 border-t pt-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+        <div>
+          <div className="font-semibold">© DeviceHub — {TEAM_NAME}</div>
+          <div className="text-xs">Leader: Tuấn Anh. Thành viên: Quỳnh Anh, Thùy Trang, Hà An, Thanh Bình, Lê Ánh.</div>
+        </div>
+        <div className="text-right text-xs">
+          <div>Thắc mắc liên hệ: <strong>{CONTACT.phone}</strong></div>
+          <div>Địa chỉ: {CONTACT.address}</div>
+          <div>Email: <a href={`mailto:${CONTACT.email}`} className="text-indigo-600">{CONTACT.email}</a></div>
+        </div>
+      </footer>
+    </div>
+  );
+}
+
+/* Home */
+function Home({nav}){
+  return (
+    <div>
+      <section className="card mb-4">
+        <div className="flex flex-col sm:flex-row items-start gap-4">
+          <div style={{flex:1}}>
+            <h1 className="text-3xl font-bold">DeviceHub — Phiên bản 4.0</h1>
+            <p className="muted mt-1">Nền tảng học tập về thiết bị số, chia sẻ file và kỹ năng công nghệ - do Nhóm 6 phát triển. Giao diện đã được nâng cấp: hiện đại, trực quan, tương tác khi rê chuột.</p>
+            <div className="mt-4 flex gap-3">
+              <button className="btn" onClick={()=>nav('/games')}>Bắt đầu</button>
+              <button className="px-3 py-2 border rounded interactive" onClick={()=>nav('/resources')}>Xem tài liệu</button>
+              <button className="px-3 py-2 border rounded interactive" onClick={()=>nav('/team')}>Về nhóm</button>
+            </div>
+            <div className="mt-3 muted text-sm">Phiên bản giao diện: <strong>4.0</strong> — Tương tác nâng cao, hiệu ứng nổi khi rê chuột.</div>
+          </div>
+
+          <div className="ml-auto flex flex-col items-end gap-3">
+            {/* Video hero + gallery */}
+            <video className="hero-video" playsInline autoPlay muted loop poster="https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=800&q=60">
+              <source src="https://cdn.coverr.co/videos/coverr-gadgets-1576/1080p.mp4" type="video/mp4" />
+            </video>
+            <div className="gallery flex gap-2">
+              <img src="https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=800&q=60" alt="laptop" />
+              <img src="https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=800&q=60" alt="coding" />
+              <img src="https://images.unsplash.com/photo-1519389950473-47ba0277781c?auto=format&fit=crop&w=800&q=60" alt="workspace" />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="card mb-4">
+        <h3 className="font-semibold">Mục nổi bật</h3>
+        <div className="mt-3 grid sm:grid-cols-3 gap-3">
+          <button onClick={()=>nav('/games')} className="p-4 border rounded text-left interactive">Trò chơi<br/><span className="text-xs muted">Quiz • Ghép đôi • Memory</span></button>
+          <button onClick={()=>nav('/guides')} className="p-4 border rounded text-left interactive">Hướng dẫn Bluetooth<br/><span className="text-xs muted">Windows/macOS/Android/iPhone</span></button>
+          <button onClick={()=>nav('/resources')} className="p-4 border rounded text-left interactive">Tài liệu<br/><span className="text-xs muted">Tải guide & cheat-sheet</span></button>
+        </div>
+      </section>
+
+      <section className="card mb-4">
+        <h3 className="font-semibold">Feedback & Bình luận</h3>
+        <CommentsCompact />
+      </section>
+    </div>
+  );
+}
+
+/* Games (unchanged) */
+const QUIZ_DATA = [
+  { id:'k1', q: 'Cách nhanh nhất để kết nối điện thoại Android với máy tính Windows để truyền file?', choices:['Qua Bluetooth','Dùng AirDrop','USB-C (cáp)','Gửi SMS'], a:2 },
+  { id:'k2', q: 'Khi truyền file bằng cáp USB-C, chế độ nào trên điện thoại cần bật để truyền dữ liệu?', choices:['Charging only','File Transfer / MTP','Photo (PTP)','No action needed'], a:1 },
+  { id:'k3', q: 'AirDrop là tính năng dành cho thiết bị nào?', choices:['Windows','macOS/iOS','Android','Linux'], a:1 },
+  { id:'k4', q: 'Khi Bluetooth không tìm thấy thiết bị, bước đầu bạn nên làm gì?', choices:['Tắt máy','Kiểm tra Bluetooth đã bật và ở chế độ discoverable','Cài lại hệ điều hành','Gỡ cáp'], a:1 },
+  { id:'k5', q: 'Để chia sẻ file lớn >100MB giữa điện thoại và PC ngồi cùng chỗ, giải pháp tốt nhất?', choices:['Bluetooth truyền thống','Dùng dịch vụ cloud','Cáp USB hoặc Wi‑Fi Direct','SMS'], a:2 },
+  { id:'k6', q: 'Thiết bị nào sau đây là thiết bị ngoại vi (peripheral)?', choices:['CPU','RAM','Chuột (mouse)','Motherboard'], a:2 },
+  { id:'k7', q: 'Khi muốn kết nối điện thoại iPhone với máy tính Windows để chuyển ảnh, thường nên dùng?', choices:['AirDrop','iCloud/Google Photos hoặc cáp Lightning to USB','Bluetooth trực tiếp','FTP'], a:1 },
+  { id:'k8', q: 'Wi‑Fi Direct hoặc tính năng chia sẻ qua Wi‑Fi giữa thiết bị thường nhanh hơn Bluetooth vì lý do nào?', choices:['Tần số thấp hơn','Băng thông/pipeline cao hơn','Bluetooth không kết nối được','Vì Wi‑Fi đẹp hơn'], a:1 },
+  { id:'k9', q: 'Khi driver Bluetooth trên Windows lỗi, vị trí kiểm tra thường là?', choices:['Device Manager','Control Panel → Fonts','Windows Media Player','Disk Management'], a:0 },
+  { id:'k10', q: 'Cổng HDMI dùng để?', choices:['Truyền âm thanh và hình ảnh sang màn hình/TV','Kết nối chuột','Sạc điện thoại','Lưu trữ dữ liệu'], a:0 },
+  { id:'k11', q: 'Cáp OTG (On-The-Go) cho phép?', choices:['Kết nối trực tiếp giữa 2 máy tính','Kết nối thiết bị USB (như USB flash) vào điện thoại','Tăng tốc mạng','Chạy ứng dụng'], a:1 },
+  { id:'k12', q: 'Khi muốn chia sẻ màn hình điện thoại lên máy tính trong buổi thuyết trình, nên dùng?', choices:['Bluetooth','Screen casting / HDMI / USB tethering','SMS','AirDrop'], a:1 },
+  { id:'k13', q: 'Để bảo mật khi ghép đôi Bluetooth, bạn nên?', choices:['Ghép đôi ở nơi công cộng và giữ trạng thái discoverable','Không chấp nhận thiết bị lạ và tắt discoverable khi xong','Gửi mã PIN cho người lạ','Để Bluetooth luôn bật'], a:1 },
+  { id:'k14', q: 'Khi máy tính không thấy điện thoại qua cáp, bước kiểm tra đầu tiên?', choices:['Thay đổi hình nền','Kiểm tra dây cáp và cổng, chọn đúng chế độ truyền dữ liệu','Gõ lệnh trong Notepad','Tắt Bluetooth'], a:1 },
+  { id:'k15', q: 'Một phương pháp nhanh để gửi nhiều ảnh từ điện thoại sang máy tính không cần cáp là?', choices:['Dùng Bluetooth cổ điển','Dùng Google Drive / OneDrive hoặc Wi‑Fi transfer app','Gửi qua email từng ảnh','Gửi qua SMS'], a:1 },
+  { id:'k16', q: 'Thiết bị lưu trữ di động nào thường nhanh nhất?', choices:['HDD ngoài 5400rpm','USB flash cũ','External SSD','Floppy disk'], a:2 },
+  { id:'k17', q: 'Khi truyền file giữa iPhone và Windows, ứng dụng nào sau đây thường giúp đơn giản?', choices:['iTunes / iCloud / Google Photos','Windows Media Player','Notepad','Calculator'], a:0 },
+  { id:'k18', q: 'Khi điện thoại báo "USB for charging", bạn cần chọn gì để truyền file?', choices:['Keep charging','File transfer (MTP)','Restart phone','Turn off screen'], a:1 },
+  { id:'k19', q: 'Khi sử dụng Wi‑Fi Direct để truyền file, cần lưu ý gì?', choices:['Cần mạng Internet','Các thiết bị phải hỗ trợ Wi‑Fi Direct và gần nhau','Phải bật Bluetooth','Phải dùng cáp'], a:1 },
+  { id:'k20', q: 'Tốc độ truyền file qua Bluetooth Classic so với Wi‑Fi Direct là?', choices:['Tương đương','Bluetooth chậm hơn nhiều','Bluetooth nhanh hơn','Không thể so sánh'], a:1 }
+];
+function Games(){
+  return (
+    <div>
+      <div className="card mb-4"><h2 className="text-2xl font-bold">Mini-games</h2><p className="muted">Ôn nhanh kiến thức bằng trò chơi.</p></div>
+      <div className="grid md:grid-cols-3 gap-4">
+        <div className="card"><Quiz /></div>
+        <div className="card"><Match /></div>
+        <div className="card"><Memory /></div>
+      </div>
+    </div>
+  );
+}
+function Quiz(){
+  // Lấy bộ câu hỏi chuyên về kết nối & thiết bị
+  const [pool] = useState(()=> shuffle(QUIZ_DATA));
+  const [questions, setQuestions] = useState(()=>{
+    try{
+      const used = JSON.parse(sessionStorage.getItem('dh_quiz_used')||'[]');
+      const available = pool.filter(q=> !used.includes(q.id));
+      const sel = (available.length < 6) ? shuffle(pool).slice(0,6) : shuffle(available).slice(0,6);
+      const newUsed = [...used, ...sel.map(s=>s.id)].slice(-1000);
+      sessionStorage.setItem('dh_quiz_used', JSON.stringify(newUsed));
+      return sel;
+    }catch(e){ return shuffle(pool).slice(0,6); }
+  });
+
+  const [i,setI] = useState(0), [score,setScore] = useState(0), [done,setDone] = useState(false);
+
+  const praises = [
+    'Tuyệt vời! Bạn đúng sương sương như pro. 🏆',
+    'Đỉnh quá — giữ phong độ nhé! ✨',
+    'Ngoài sức tưởng tượng, team cần bạn! 💪',
+    'Trình cao, cho điểm vàng! 🌟'
+  ];
+  const taunts = [
+    'Ừm… cần cà phê thêm chứ không ổn lắm 😅',
+    'Học tiếp nhé, lần sau đừng để tui bơ bạn nha 😜',
+    'Ơ kìa, có vẻ cần ôn lại phần cáp vs Bluetooth 😂',
+    'Chưa đạt, nhưng still have potential — cố lên! 😉'
+  ];
+
+  function pickRandom(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+
+  function choose(idx){
+    const correct = (idx === questions[i].a);
+    const newScore = correct ? score + 1 : score;
+    setScore(newScore);
+    if(i+1 >= questions.length){
+      setDone(true);
+      const percent = Math.round((newScore / questions.length) * 100);
+      const prevHigh = Number(localStorage.getItem('dh_quiz_high')||0);
+      if(percent > prevHigh) localStorage.setItem('dh_quiz_high', percent);
+      localStorage.setItem('dh_quiz_last', percent);
+      localStorage.setItem('dh_quiz_feedback', correct ? pickRandom(praises) : pickRandom(taunts));
+    } else {
+      setI(i+1);
+    }
+  }
+
+  function reset(){
+    try{
+      const used = JSON.parse(sessionStorage.getItem('dh_quiz_used')||'[]');
+      const available = pool.filter(q=> !used.includes(q.id));
+      const sel = (available.length < 6) ? shuffle(pool).slice(0,6) : shuffle(available).slice(0,6);
+      const newUsed = [...used, ...sel.map(s=>s.id)].slice(-1000);
+      sessionStorage.setItem('dh_quiz_used', JSON.stringify(newUsed));
+      setQuestions(sel); setI(0); setScore(0); setDone(false);
+    }catch(e){ setQuestions(shuffle(pool).slice(0,6)); setI(0); setScore(0); setDone(false); }
+  }
+
+  const high = Number(localStorage.getItem('dh_quiz_high')||0);
+  const last = Number(localStorage.getItem('dh_quiz_last')||0);
+  const feedback = localStorage.getItem('dh_quiz_feedback') || '';
+
+  return (
+    <div>
+      <h4 className="font-semibold">Quiz — Kiến thức kết nối & thiết bị</h4>
+      {!done ? (
+        <div>
+          <div className="mt-2">{questions[i].q}</div>
+          <div className="mt-2 space-y-2">
+            {questions[i].choices.map((c,idx)=> <button key={idx} className="w-full p-2 border rounded interactive" onClick={()=>choose(idx)}>{c}</button>)}
+          </div>
+          <div className="mt-2 text-xs muted">Câu {i+1} / {questions.length} — Điểm hiện tại: <strong>{score}</strong></div>
+        </div>
+      ) : (
+        <div className="text-center">
+          <div className="text-lg font-bold">Hoàn thành 🎉</div>
+          <div className="mt-2">Điểm: <strong>{score}</strong> / {questions.length}</div>
+          <div className="mt-2">Tỉ lệ: <strong>{last}%</strong></div>
+          <div className="mt-2 text-sm">{feedback}</div>
+          <div className="mt-2">Điểm cao nhất (session): <strong>{high}%</strong></div>
+          <div className="mt-2"><button className="px-3 py-1 border rounded" onClick={reset}>Chơi lại</button></div>
+        </div>
+      )}
+    </div>
+  );
+} 
+/* Match & Memory same as original for brevity */
+const MATCH_ITEMS = [ { id:'phone', name:'Điện thoại', hint:'Gọi, nhắn tin' }, { id:'router', name:'Router', hint:'Phát Wi-Fi' }, { id:'usb', name:'USB', hint:'Lưu trữ' } ];
+function Match(){
+  const [left, setLeft] = useState(()=>shuffle(MATCH_ITEMS));
+  const [right, setRight] = useState(()=>shuffle(MATCH_ITEMS.map(i=>({...i, face: i.hint}))));
+  const [sel, setSel] = useState(null);
+  const [matches, setMatches] = useState([]);
+  function pickLeft(it){ setSel({side:'L', it}); }
+  function pickRight(it){ if(!sel){ setSel({side:'R', it}); return; } let a,b; if(sel.side === 'L'){ a = sel.it; b = it; } else { a = it; b = sel.it; } if(a.id === b.id){ setMatches(prev => { if(prev.includes(a.id)) return prev; return [...prev, a.id]; }); } setSel(null); }
+  function resetGame(){ setLeft(shuffle(MATCH_ITEMS)); setRight(shuffle(MATCH_ITEMS.map(i=>({...i, face: i.hint})))) ; setMatches([]); setSel(null); }
+  return (
+    <div>
+      <h4 className="font-semibold">Ghép đôi</h4>
+      <div className="mt-2 grid grid-cols-2 gap-2">
+        <div>
+          <div className="text-xs muted mb-2">Tên</div>
+          <div className="grid gap-2">
+            {left.map(l=>(
+              <button key={l.id} disabled={matches.includes(l.id)} onClick={()=>pickLeft(l)} className={`p-2 text-left border rounded ${sel?.it?.id===l.id && sel.side==='L' ? 'ring-2 ring-indigo-300' : ''} ${matches.includes(l.id) ? 'opacity-40 line-through' : ''}`}>{l.name}</button>
+            ))}
+          </div>
+        </div>
+        <div>
+          <div className="text-xs muted mb-2">Chức năng</div>
+          <div className="grid gap-2">
+            {right.map(r=>(
+              <button key={r.id} disabled={matches.includes(r.id)} onClick={()=>pickRight(r)} className={`p-2 text-left border rounded ${sel?.it?.id===r.id && sel.side==='R' ? 'ring-2 ring-indigo-300' : ''} ${matches.includes(r.id) ? 'opacity-40 line-through' : ''}`}>{r.face}</button>
+            ))}
+          </div>
+        </div>
+      </div>
+      <div className="mt-2 flex items-center justify-between"><div className="text-sm">Đã ghép: {matches.length}/{MATCH_ITEMS.length}</div><div><button className="px-3 py-1 border rounded" onClick={resetGame}>Làm lại</button></div></div>
+    </div>
+  );
+}
+function Memory(){
+  const base = [{id:'phone',label:'📱'},{id:'usb',label:'💾'},{id:'router',label:'📶'}];
+  const initial = useState(()=>shuffle([...base,...base].map((x,i)=>({...x, uid: x.id + '_' + i}))))[0];
+  const [cards, setCards] = useState(initial);
+  const [flipped, setFlipped] = useState([]);
+  const [matched, setMatched] = useState([]);
+  function flip(c){ if(flipped.includes(c.uid) || matched.includes(c.id)) return; const next = [...flipped, c.uid]; setFlipped(next); if(next.length === 2){ const a = cards.find(x=>x.uid===next[0]), b = cards.find(x=>x.uid===next[1]); if(a.id === b.id){ setMatched(prev=>[...new Set([...prev, a.id])]); setFlipped([]); } else { setTimeout(()=> setFlipped([]), 600); } } }
+  function resetMemory(){ const p = shuffle([...base,...base].map((x,i)=>({...x, uid: x.id + '_' + i}))); setCards(p); setFlipped([]); setMatched([]); }
+  return (
+    <div>
+      <h4 className="font-semibold">Memory</h4>
+      <div className="mt-3 grid grid-cols-4 gap-2">{cards.map(c=>(<button key={c.uid} onClick={()=>flip(c)} className="p-3 border rounded h-20 text-lg">{ flipped.includes(c.uid) || matched.includes(c.id) ? c.label : '❓' }</button>))}</div>
+      <div className="mt-2 text-right"><button className="px-3 py-1 border rounded" onClick={resetMemory}>Làm lại</button></div>
+    </div>
+  );
+}
+
+/* Guides */
+function Guides(){
+  return (
+    <div className="card">
+      <h2 className="text-xl font-bold">Hướng dẫn Bluetooth & Tips</h2>
+      <div className="mt-3 grid md:grid-cols-2 gap-3">
+        <div>
+          <h4 className="font-semibold">Windows</h4>
+          <ol className="pl-5 list-decimal muted text-sm"><li>Bật Bluetooth trên cả hai.</li><li>Settings → Bluetooth & devices → Add device.</li><li>Chấp nhận mã, gửi file từ điện thoại → Share → Bluetooth.</li></ol>
+        </div>
+        <div>
+          <h4 className="font-semibold">iPhone</h4>
+          <p className="muted text-sm">iPhone không chia sẻ Bluetooth trực tiếp với Android/Windows; dùng AirDrop hoặc cáp/đám mây. Xem bài viết liên quan bên mục Bài viết.</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* Resources - expanded */
+function Resources(){
+  const [query, setQuery] = useState('');
+  const [filterTag, setFilterTag] = useState('');
+  const tags = Array.from(new Set(DOCS.flatMap(d=>d.tags)));
+  const visible = DOCS.filter(d=> (d.title + d.desc).toLowerCase().includes(query.toLowerCase()) && (!filterTag || d.tags.includes(filterTag)) );
+
+  function preview(doc){ alert('Preview: ' + doc.title + '\n\n' + doc.desc); }
+  return (
+    <div className="card">
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <h2 className="text-xl font-bold">Tài liệu & Tải xuống</h2>
+          <div className="muted">Danh sách tài liệu do Nhóm 6 tổng hợp. Có thể tải hoặc xem thông tin trước khi tải.</div>
+        </div>
+        <div className="text-right text-xs muted">Liên hệ: <a href={`tel:${CONTACT.phone}`} className="text-indigo-600">{CONTACT.phone}</a></div>
+      </div>
+
+      <div className="mt-4 mb-3 flex gap-2 items-center">
+        <input value={query} onChange={e=>setQuery(e.target.value)} placeholder="Tìm tài liệu..." className="p-2 border rounded flex-1" />
+        <select value={filterTag} onChange={e=>setFilterTag(e.target.value)} className="p-2 border rounded">
+          <option value="">— Tất cả thẻ —</option>
+          {tags.map(t=>(<option key={t} value={t}>{t}</option>))}
+        </select>
+        <button className="px-3 py-2 border rounded" onClick={()=>downloadFile('all_docs_list.json', JSON.stringify(DOCS, null, 2), 'application/json')}>Export list</button>
+      </div>
+
+      <div className="space-y-3">
+        {visible.map(d=> (
+          <div key={d.id} className="border rounded p-4 flex items-center gap-4">
+            <div>
+              <div className="font-semibold">{d.title}</div>
+              <div className="muted text-sm mt-1">{d.desc}</div>
+              <div className="mt-2 flex gap-2 items-center text-xs">
+                <div className="tag">{d.size}</div>
+                {d.tags.map(t=> <div key={t} className="tag">{t}</div>)}
+              </div>
+            </div>
+            <div className="ml-auto flex gap-2">
+              <button className="px-3 py-2 border rounded" onClick={()=>preview(d)}>Xem</button>
+              <button className="btn" onClick={()=>downloadFile(d.title, d.content)} aria-label={`Tải ${d.title}`}>Tải xuống</button>
+            </div>
+          </div>
+        ))}
+        {visible.length===0 && <div className="muted">Không tìm thấy tài liệu phù hợp.</div>}
+      </div>
+
+      <div className="mt-4">
+        <h4 className="font-semibold">Bài viết liên quan</h4>
+        <ul className="pl-5 mt-2 space-y-2">
+          {ARTICLES.map((a,i)=> <li key={i}><a href={a.href} className="text-indigo-600">{a.title}</a> — <span className="muted text-sm">{a.summary}</span></li>)}
+        </ul>
+      </div>
+    </div>
+  );
+}
+
+/* Team page */
+function TeamPage(){
+  return (
+    <div className="card">
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-xl font-bold">Giới thiệu Nhóm</h2>
+          <div className="muted">{TEAM_NAME} — Đội ngũ phát triển của DeviceHub</div>
+        </div>
+        <div className="text-sm muted">Hợp tác: THPT Hiệp Hòa số 1</div>
+      </div>
+
+      <div className="mt-4 grid sm:grid-cols-3 gap-4">
+        {MEMBERS.map((m,idx)=> (
+          <div key={idx} className="border rounded p-4 flex gap-3 items-start">
+            <img src={`https://api.dicebear.com/5.x/identicon/svg?seed=${encodeURIComponent(m.name)}`} alt="avatar" className="avatar" />
+            <div>
+              <div className="font-semibold">{m.name}</div>
+              <div className="text-sm muted">{m.role}</div>
+              <div className="mt-2 text-sm">{m.bio}</div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div className="mt-4">
+        <h4 className="font-semibold">Công việc chính của từng thành viên</h4>
+        <ol className="pl-5 mt-2 muted text-sm">
+          {MEMBERS.map((m,i)=>(<li key={i}><strong>{m.name}:</strong> {m.role} — {m.bio}</li>))}
+        </ol>
+      </div>
+
+      <div className="mt-4 flex gap-2">
+        <button className="btn" onClick={()=>downloadFile('team_profile.json', JSON.stringify(MEMBERS, null, 2), 'application/json')}>Tải thông tin nhóm</button>
+        <button className="px-3 py-2 border rounded" onClick={()=>alert('Gửi yêu cầu liên hệ nhóm: ' + CONTACT.phone)}>Liên hệ nhóm</button>
+      </div>
+    </div>
+  );
+}
+
+/* Articles page */
+function Articles(){
+  return (
+    <div className="card">
+      <h2 className="text-xl font-bold">Bài viết & Tài nguyên tham khảo</h2>
+      <div className="mt-3 grid gap-3">
+        {ARTICLES.map((a,i)=> (
+          <article key={i} className="border rounded p-4">
+            <h3 className="font-semibold"><a href={a.href} className="text-indigo-600">{a.title}</a></h3>
+            <p className="muted text-sm mt-1">{a.summary}</p>
+            <div className="mt-2 text-xs"><a href={a.href} className="px-3 py-1 border rounded">Đọc chi tiết</a></div>
+          </article>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function ArticleDetail({slug}){
+  const art = ARTICLES.find(a=>a.slug === slug);
+  if(!art) return (
+    <div className="card">
+      <div className="font-semibold">Bài viết không tìm thấy</div>
+      <div className="mt-2"><a href="#/articles" className="px-3 py-1 border rounded">Quay lại danh sách</a></div>
+    </div>
+  );
+  return (
+    <div className="card">
+      <div className="flex items-center justify-between">
+        <h2 className="text-xl font-bold">{art.title}</h2>
+        <a href="#/articles" className="text-sm muted">← Quay lại</a>
+      </div>
+      <div className="mt-3 muted whitespace-pre-wrap text-sm">{art.content}</div>
+    </div>
+  );
+}
+
+/* Comments compact */
+function CommentsCompact(){
+  const KEY = 'devicehub_comments_v2';
+  const [list, setList] = useState(()=>{ try{ return JSON.parse(localStorage.getItem(KEY)||'[]'); }catch(e){ return []; } });
+  const [name, setName] = useState('');
+  const [text, setText] = useState('');
+  function post(){ if(!name.trim()||!text.trim()){ alert('Nhập tên & nội dung'); return; } const c = { id: Date.now(), name: name.trim(), text: text.trim(), ts: Date.now() }; const arr = [c, ...list]; localStorage.setItem(KEY, JSON.stringify(arr)); setList(arr); setName(''); setText(''); }
+  return (
+    <div>
+      <div className="grid md:grid-cols-3 gap-2">
+        <input value={name} onChange={e=>setName(e.target.value)} placeholder="Tên" className="p-2 border rounded" />
+        <input value={text} onChange={e=>setText(e.target.value)} placeholder="Nội dung" className="p-2 border rounded md:col-span-2" />
+      </div>
+      <div className="mt-2 flex gap-2">
+        <button className="btn" onClick={post}>Gửi</button>
+        <button className="px-3 py-2 border rounded" onClick={()=>{ downloadFile('comments.json', JSON.stringify(list, null, 2), 'application/json'); }}>Export JSON</button>
+      </div>
+      <div className="mt-3">
+        {list.slice(0,6).map(c=>(
+          <div key={c.id} className="border rounded p-3 mb-2">
+            <div className="font-semibold">{c.name}</div>
+            <div className="text-xs muted">{new Date(c.ts).toLocaleString()}</div>
+            <div className="mt-1">{c.text}</div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>
