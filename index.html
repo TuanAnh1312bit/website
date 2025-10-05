@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>DeviceHub — Nhóm 6</title>
+<title>DeviceHub — Nhóm 6 (Complete)</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
 <style>
@@ -28,7 +28,13 @@
   .nav-btn{padding:.5rem .8rem;border-radius:10px;border:1px solid rgba(2,6,23,0.04);background:transparent}
   .nav-btn:hover{background:linear-gradient(90deg, rgba(124,58,237,0.06), rgba(6,182,212,0.04))}
   .score-badge{background:linear-gradient(90deg,#ffd166,#ff6b6b);padding:.4rem .7rem;border-radius:999px;color:#08122a;font-weight:700}
-  @media (max-width:880px){ .hero-video{width:100%;height:190px} .gallery img{width:96px;height:64px} .container{padding:16px} }
+  /* comment styles */
+  .comment-box{background:linear-gradient(180deg,rgba(255,255,255,0.9),rgba(255,255,255,0.85));border-radius:12px;padding:12px;border:1px solid rgba(2,6,23,0.04)}
+  .comment{transition:box-shadow .12s ease;border-radius:10px;padding:12px}
+  .reply{margin-left:56px}
+  .muted-2{color:#607085;font-size:0.9rem}
+  .avatar-small{width:36px;height:36px;border-radius:8px;object-fit:cover}
+  @media (max-width:880px){ .hero-video{width:100%;height:190px} .gallery img{width:96px;height:64px} .container{padding:16px} .reply{margin-left:12px} }
 </style>
 </head>
 <body>
@@ -45,8 +51,9 @@ const { useState, useEffect } = React;
 /* Utilities */
 function shuffle(arr){ return [...arr].sort(()=>Math.random()-0.5); }
 function downloadFile(filename, content, mime='text/plain'){ const blob = new Blob([content], {type: mime}); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = filename; document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url); }
+function timeAgo(ts){ const s = Math.floor((Date.now()-ts)/1000); if(s<60) return s+'s trước'; if(s<3600) return Math.floor(s/60)+'m trước'; if(s<86400) return Math.floor(s/3600)+'h trước'; return Math.floor(s/86400)+' ngày trước'; }
 
-/* App data (editable) */
+/* App data (unchanged) */
 const TEAM_NAME = 'NHÓM 6';
 const CONTACT = {
   phone: '0911110970',
@@ -80,7 +87,7 @@ Mẹo tối ưu: giữ khoảng cách <5m, tắt các thiết bị gây nhiễu,
 - Dùng Troubleshoot (Settings → Update & Security → Troubleshoot).
 
 Nếu vẫn không được, thử cập nhật driver từ trang nhà sản xuất.` },
-  { slug:'airdrops-vs-bluetooth', title:'So sánh AirDrop và Bluetooth', href:'#/articles/airdrops-vs-bluetooth', summary:'Khi nào nên dùng AirDrop, cáp hoặc dịch vụ đám mây.', content:`AirDrop là giải pháp của Apple, cực nhanh trên hệ sinh thái iOS/macOS và sử dụng cả Wi‑Fi Direct lẫn Bluetooth để thiết lập kết nối.
+  { slug:'airdrops-vs-bluetooth', title:'So sánh AirDrop và Bluetooth', href:'#/articles/airdrops-vs-bluetooth', summary:'Khi nào nên dùng AirDrop, cáp hoặc dịch vụ đám mây.', content:`AirDrop là giải pháp của Apple, cực nhanh trên hệ sinh thái iOS/macOS và sử dụng cả Wi-Fi Direct lẫn Bluetooth để thiết lập kết nối.
 
 So sánh nhanh:
 - AirDrop: nhanh, ổn định trên Apple → dùng cho file lớn giữa iPhone/Mac.
@@ -95,17 +102,28 @@ const DOCS = [
 1. Tổng quan
 Mục tiêu: truyền file, chia sẻ màn hình, debug, và sao lưu dữ liệu.
 
-2. Kết nối qua cáp USB (Android - Windows)\- Dùng cáp USB-C/USB-A tùy máy.\- Trên điện thoại: chọn chế độ File Transfer / MTP.\- Trên Windows: thiết bị sẽ xuất hiện trong File Explorer.
+2. Kết nối qua cáp USB (Android - Windows)
+- Dùng cáp USB-C/USB-A tùy máy.
+- Trên điện thoại: chọn chế độ File Transfer / MTP.
+- Trên Windows: thiết bị sẽ xuất hiện trong File Explorer.
 
-3. Kết nối iPhone - Windows\- Dùng cáp Lightning to USB hoặc iCloud / Google Photos.\- Cài iTunes hoặc mở Photos để import hình.
+3. Kết nối iPhone - Windows
+- Dùng cáp Lightning to USB hoặc iCloud / Google Photos.
+- Cài iTunes hoặc mở Photos để import hình.
 
-4. Kết nối qua Wi‑Fi (Wi‑Fi Direct / Apps)\- Sử dụng ứng dụng: ShareIt, Feem, Snapdrop, hoặc SMB for advanced.\- Ưu điểm: nhanh hơn Bluetooth, phù hợp file lớn.
+4. Kết nối qua Wi-Fi (Wi-Fi Direct / Apps)
+- Sử dụng ứng dụng: ShareIt, Feem, Snapdrop, hoặc SMB for advanced.
+- Ưu điểm: nhanh hơn Bluetooth, phù hợp file lớn.
 
-5. Kết nối qua Bluetooth\- Dùng cho file nhỏ và thiết bị ngoại vi.\- Bật Bluetooth, ghép đôi, chấp nhận truyền file.
+5. Kết nối qua Bluetooth
+- Dùng cho file nhỏ và thiết bị ngoại vi.
+- Bật Bluetooth, ghép đôi, chấp nhận truyền file.
 
-6. Khắc phục sự cố cơ bản\- Kiểm tra cáp, driver, chế độ truyền trên điện thoại, bật quyền truy cập file, thử cổng khác.
+6. Khắc phục sự cố cơ bản
+- Kiểm tra cáp, driver, chế độ truyền trên điện thoại, bật quyền truy cập file, thử cổng khác.
 
-7. Mẹo & bảo mật\- Tắt discoverable sau khi ghép đôi, dùng mật khẩu/ mã PIN khi được yêu cầu.`, size:'38KB', desc:'Hướng dẫn đầy đủ kết nối PC và điện thoại (Android & iPhone).', tags:['ket-noi','pc','dien-thoai','doc']},
+7. Mẹo & bảo mật
+- Tắt discoverable sau khi ghép đôi, dùng mật khẩu/ mã PIN khi được yêu cầu.`, size:'38KB', desc:'Hướng dẫn đầy đủ kết nối PC và điện thoại (Android & iPhone).', tags:['ket-noi','pc','dien-thoai','doc']},
   {id:'d2', title:'ThietBi_ThongDung.doc', content:`TÌM HIỂU CÁC THIẾT BỊ SỐ THÔNG DỤNG
 
 1. Laptop/PC: CPU, RAM, SSD/HDD, GPU, mainboard.
@@ -117,19 +135,56 @@ Mẹo nhận biết và chọn thiết bị phù hợp cho học tập: RAM tố
   {id:'d3', title:'ChuyenFile_PhuHop.doc', content:`PHƯƠNG PHÁP CHUYỂN FILE PHÙ HỢP
 
 1. Nhỏ (dưới 10MB): Bluetooth hoặc gửi qua email.
-2. Trung bình (10-200MB): Wi‑Fi Direct, cáp USB hoặc ứng dụng ShareIt/Snapdrop.
+2. Trung bình (10-200MB): Wi-Fi Direct, cáp USB hoặc ứng dụng ShareIt/Snapdrop.
 3. Lớn (>200MB): cáp USB, External SSD, hoặc dịch vụ cloud (Google Drive/OneDrive).
 
 Hướng dẫn từng bước cho mỗi phương pháp, ưu nhược điểm và mẹo tăng tốc truyền file.`, size:'22KB', desc:'Hướng dẫn chọn phương pháp chuyển file theo kích thước.', tags:['file','doc']},
   {id:'d4', title:'Lab_Exercises.doc', content:`BỘ BÀI TẬP THỰ HÀNH KẾT NỐI
 
 Bài 1: Ghép đôi Bluetooth và mô tả các bước từng bước.
-Bài 2: Gửi ảnh 50MB từ Android sang Windows bằng Wi‑Fi transfer và ghi lại thời gian.
+Bài 2: Gửi ảnh 50MB từ Android sang Windows bằng Wi-Fi transfer và ghi lại thời gian.
 Bài 3: Kết nối iPhone với Windows bằng cáp Lightning, import ảnh.
 Bài 4: Khắc phục lỗi "Device not recognized" trên Windows khi cắm cáp.
 
 Đáp án gợi ý và checklist kỹ thuật kèm theo.`, size:'44KB', desc:'Bộ bài tập thực hành chi tiết (dạng doc).', tags:['lab','doc']}
 ];
+
+/* Games & Quiz (full set preserved) */
+const QUIZ_DATA = [
+  { id:'k1', q: 'Cách nhanh nhất để kết nối điện thoại Android với máy tính Windows để truyền file?', choices:['Qua Bluetooth','Dùng AirDrop','USB-C (cáp)','Gửi SMS'], a:2 },
+  { id:'k2', q: 'Khi truyền file bằng cáp USB-C, chế độ nào trên điện thoại cần bật để truyền dữ liệu?', choices:['Charging only','File Transfer / MTP','Photo (PTP)','No action needed'], a:1 },
+  { id:'k3', q: 'AirDrop là tính năng dành cho thiết bị nào?', choices:['Windows','macOS/iOS','Android','Linux'], a:1 },
+  { id:'k4', q: 'Khi Bluetooth không tìm thấy thiết bị, bước đầu bạn nên làm gì?', choices:['Tắt máy','Kiểm tra Bluetooth đã bật và ở chế độ discoverable','Cài lại hệ điều hành','Gỡ cáp'], a:1 },
+  { id:'k5', q: 'Để chia sẻ file lớn >100MB giữa điện thoại và PC ngồi cùng chỗ, giải pháp tốt nhất?', choices:['Bluetooth truyền thống','Dùng dịch vụ cloud','Cáp USB hoặc Wi-Fi Direct','SMS'], a:2 },
+  { id:'k6', q: 'Thiết bị nào sau đây là thiết bị ngoại vi (peripheral)?', choices:['CPU','RAM','Chuột (mouse)','Motherboard'], a:2 },
+  { id:'k7', q: 'Khi muốn kết nối điện thoại iPhone với máy tính Windows để chuyển ảnh, thường nên dùng?', choices:['AirDrop','iCloud/Google Photos hoặc cáp Lightning to USB','Bluetooth trực tiếp','FTP'], a:1 },
+  { id:'k8', q: 'Wi-Fi Direct hoặc tính năng chia sẻ qua Wi-Fi giữa thiết bị thường nhanh hơn Bluetooth vì lý do nào?', choices:['Tần số thấp hơn','Băng thông/pipeline cao hơn','Bluetooth không kết nối được','Vì Wi-Fi đẹp hơn'], a:1 },
+  { id:'k9', q: 'Khi driver Bluetooth trên Windows lỗi, vị trí kiểm tra thường là?', choices:['Device Manager','Control Panel → Fonts','Windows Media Player','Disk Management'], a:0 },
+  { id:'k10', q: 'Cổng HDMI dùng để?', choices:['Truyền âm thanh và hình ảnh sang màn hình/TV','Kết nối chuột','Sạc điện thoại','Lưu trữ dữ liệu'], a:0 },
+  { id:'k11', q: 'Cáp OTG (On-The-Go) cho phép?', choices:['Kết nối trực tiếp giữa 2 máy tính','Kết nối thiết bị USB (như USB flash) vào điện thoại','Tăng tốc mạng','Chạy ứng dụng'], a:1 },
+  { id:'k12', q: 'Khi muốn chia sẻ màn hình điện thoại lên máy tính trong buổi thuyết trình, nên dùng?', choices:['Bluetooth','Screen casting / HDMI / USB tethering','SMS','AirDrop'], a:1 },
+  { id:'k13', q: 'Để bảo mật khi ghép đôi Bluetooth, bạn nên?', choices:['Ghép đôi ở nơi công cộng và giữ trạng thái discoverable','Không chấp nhận thiết bị lạ và tắt discoverable khi xong','Gửi mã PIN cho người lạ','Để Bluetooth luôn bật'], a:1 },
+  { id:'k14', q: 'Khi máy tính không thấy điện thoại qua cáp, bước kiểm tra đầu tiên?', choices:['Thay đổi hình nền','Kiểm tra dây cáp và cổng, chọn đúng chế độ truyền dữ liệu','Gõ lệnh trong Notepad','Tắt Bluetooth'], a:1 },
+  { id:'k15', q: 'Một phương pháp nhanh để gửi nhiều ảnh từ điện thoại sang máy tính không cần cáp là?', choices:['Dùng Bluetooth cổ điển','Dùng Google Drive / OneDrive hoặc Wi-Fi transfer app','Gửi qua email từng ảnh','Gửi qua SMS'], a:1 },
+  { id:'k16', q: 'Thiết bị lưu trữ di động nào thường nhanh nhất?', choices:['HDD ngoài 5400rpm','USB flash cũ','External SSD','Floppy disk'], a:2 },
+  { id:'k17', q: 'Khi truyền file giữa iPhone và Windows, ứng dụng nào sau đây thường giúp đơn giản?', choices:['iTunes / iCloud / Google Photos','Windows Media Player','Notepad','Calculator'], a:0 },
+  { id:'k18', q: 'Khi điện thoại báo "USB for charging", bạn cần chọn gì để truyền file?', choices:['Keep charging','File transfer (MTP)','Restart phone','Turn off screen'], a:1 },
+  { id:'k19', q: 'Khi sử dụng Wi-Fi Direct để truyền file, cần lưu ý gì?', choices:['Cần mạng Internet','Các thiết bị phải hỗ trợ Wi-Fi Direct và gần nhau','Phải bật Bluetooth','Phải dùng cáp'], a:1 },
+  { id:'k20', q: 'Tốc độ truyền file qua Bluetooth Classic so với Wi-Fi Direct là?', choices:['Tương đương','Bluetooth chậm hơn nhiều','Bluetooth nhanh hơn','Không thể so sánh'], a:1 }
+];
+
+const MATCH_ITEMS = [ { id:'phone', name:'Điện thoại', hint:'Gọi, nhắn tin' }, { id:'router', name:'Router', hint:'Phát Wi-Fi' }, { id:'usb', name:'USB', hint:'Lưu trữ' } ];
+const BASE_MEMORY = [{id:'phone',label:'📱'},{id:'usb',label:'💾'},{id:'router',label:'📶'}];
+
+/* Seed comments to make page look alive (kept) */
+const SEED_COMMENTS = [
+  { id: 'c1', name: 'Ngọc', avatarSeed: 'Ngoc', text: 'Giao diện đẹp quá! Mượt, dễ dùng và rất trực quan. 👏', ts: Date.now()-1000*60*60*2, likes:3, replies:[{id:'c1_r1', name:'Tuấn Anh', avatarSeed:'TuanAnh', text:'Cảm ơn bạn! Team sẽ cố gắng cập nhật nhiều nội dung hơn 💜', ts: Date.now()-1000*60*30, likes:2}]},
+  { id: 'c2', name: 'Minh', avatarSeed: 'Minh', text: 'Các trò chơi nhỏ rất hữu ích để ôn lại kiến thức. Có thể thêm chế độ thách đấu không?', ts: Date.now()-1000*60*60*24, likes:5, replies:[{id:'c2_r1', name:'Quỳnh Anh', avatarSeed:'QuynhAnh', text:'Ý tưởng hay! Sẽ thảo luận với nhóm để làm chế độ PvP ✨', ts: Date.now()-1000*60*60*20, likes:1}]},
+  { id: 'c3', name: 'Lan', avatarSeed: 'Lan', text: 'Tài liệu rõ ràng, cảm ơn nhóm nhé!', ts: Date.now()-1000*60*60*3, likes:1, replies:[]}
+];
+
+const COMMENTS_KEY = 'devicehub_comments_v3';
+const LIKES_KEY = 'devicehub_liked_v3';
 
 /* App */
 function App(){
@@ -232,29 +287,7 @@ function Home({nav}){
   );
 }
 
-/* Games (unchanged) */
-const QUIZ_DATA = [
-  { id:'k1', q: 'Cách nhanh nhất để kết nối điện thoại Android với máy tính Windows để truyền file?', choices:['Qua Bluetooth','Dùng AirDrop','USB-C (cáp)','Gửi SMS'], a:2 },
-  { id:'k2', q: 'Khi truyền file bằng cáp USB-C, chế độ nào trên điện thoại cần bật để truyền dữ liệu?', choices:['Charging only','File Transfer / MTP','Photo (PTP)','No action needed'], a:1 },
-  { id:'k3', q: 'AirDrop là tính năng dành cho thiết bị nào?', choices:['Windows','macOS/iOS','Android','Linux'], a:1 },
-  { id:'k4', q: 'Khi Bluetooth không tìm thấy thiết bị, bước đầu bạn nên làm gì?', choices:['Tắt máy','Kiểm tra Bluetooth đã bật và ở chế độ discoverable','Cài lại hệ điều hành','Gỡ cáp'], a:1 },
-  { id:'k5', q: 'Để chia sẻ file lớn >100MB giữa điện thoại và PC ngồi cùng chỗ, giải pháp tốt nhất?', choices:['Bluetooth truyền thống','Dùng dịch vụ cloud','Cáp USB hoặc Wi‑Fi Direct','SMS'], a:2 },
-  { id:'k6', q: 'Thiết bị nào sau đây là thiết bị ngoại vi (peripheral)?', choices:['CPU','RAM','Chuột (mouse)','Motherboard'], a:2 },
-  { id:'k7', q: 'Khi muốn kết nối điện thoại iPhone với máy tính Windows để chuyển ảnh, thường nên dùng?', choices:['AirDrop','iCloud/Google Photos hoặc cáp Lightning to USB','Bluetooth trực tiếp','FTP'], a:1 },
-  { id:'k8', q: 'Wi‑Fi Direct hoặc tính năng chia sẻ qua Wi‑Fi giữa thiết bị thường nhanh hơn Bluetooth vì lý do nào?', choices:['Tần số thấp hơn','Băng thông/pipeline cao hơn','Bluetooth không kết nối được','Vì Wi‑Fi đẹp hơn'], a:1 },
-  { id:'k9', q: 'Khi driver Bluetooth trên Windows lỗi, vị trí kiểm tra thường là?', choices:['Device Manager','Control Panel → Fonts','Windows Media Player','Disk Management'], a:0 },
-  { id:'k10', q: 'Cổng HDMI dùng để?', choices:['Truyền âm thanh và hình ảnh sang màn hình/TV','Kết nối chuột','Sạc điện thoại','Lưu trữ dữ liệu'], a:0 },
-  { id:'k11', q: 'Cáp OTG (On-The-Go) cho phép?', choices:['Kết nối trực tiếp giữa 2 máy tính','Kết nối thiết bị USB (như USB flash) vào điện thoại','Tăng tốc mạng','Chạy ứng dụng'], a:1 },
-  { id:'k12', q: 'Khi muốn chia sẻ màn hình điện thoại lên máy tính trong buổi thuyết trình, nên dùng?', choices:['Bluetooth','Screen casting / HDMI / USB tethering','SMS','AirDrop'], a:1 },
-  { id:'k13', q: 'Để bảo mật khi ghép đôi Bluetooth, bạn nên?', choices:['Ghép đôi ở nơi công cộng và giữ trạng thái discoverable','Không chấp nhận thiết bị lạ và tắt discoverable khi xong','Gửi mã PIN cho người lạ','Để Bluetooth luôn bật'], a:1 },
-  { id:'k14', q: 'Khi máy tính không thấy điện thoại qua cáp, bước kiểm tra đầu tiên?', choices:['Thay đổi hình nền','Kiểm tra dây cáp và cổng, chọn đúng chế độ truyền dữ liệu','Gõ lệnh trong Notepad','Tắt Bluetooth'], a:1 },
-  { id:'k15', q: 'Một phương pháp nhanh để gửi nhiều ảnh từ điện thoại sang máy tính không cần cáp là?', choices:['Dùng Bluetooth cổ điển','Dùng Google Drive / OneDrive hoặc Wi‑Fi transfer app','Gửi qua email từng ảnh','Gửi qua SMS'], a:1 },
-  { id:'k16', q: 'Thiết bị lưu trữ di động nào thường nhanh nhất?', choices:['HDD ngoài 5400rpm','USB flash cũ','External SSD','Floppy disk'], a:2 },
-  { id:'k17', q: 'Khi truyền file giữa iPhone và Windows, ứng dụng nào sau đây thường giúp đơn giản?', choices:['iTunes / iCloud / Google Photos','Windows Media Player','Notepad','Calculator'], a:0 },
-  { id:'k18', q: 'Khi điện thoại báo "USB for charging", bạn cần chọn gì để truyền file?', choices:['Keep charging','File transfer (MTP)','Restart phone','Turn off screen'], a:1 },
-  { id:'k19', q: 'Khi sử dụng Wi‑Fi Direct để truyền file, cần lưu ý gì?', choices:['Cần mạng Internet','Các thiết bị phải hỗ trợ Wi‑Fi Direct và gần nhau','Phải bật Bluetooth','Phải dùng cáp'], a:1 },
-  { id:'k20', q: 'Tốc độ truyền file qua Bluetooth Classic so với Wi‑Fi Direct là?', choices:['Tương đương','Bluetooth chậm hơn nhiều','Bluetooth nhanh hơn','Không thể so sánh'], a:1 }
-];
+/* Games */
 function Games(){
   return (
     <div>
@@ -352,9 +385,8 @@ function Quiz(){
       )}
     </div>
   );
-} 
-/* Match & Memory same as original for brevity */
-const MATCH_ITEMS = [ { id:'phone', name:'Điện thoại', hint:'Gọi, nhắn tin' }, { id:'router', name:'Router', hint:'Phát Wi-Fi' }, { id:'usb', name:'USB', hint:'Lưu trữ' } ];
+}
+
 function Match(){
   const [left, setLeft] = useState(()=>shuffle(MATCH_ITEMS));
   const [right, setRight] = useState(()=>shuffle(MATCH_ITEMS.map(i=>({...i, face: i.hint}))));
@@ -389,7 +421,7 @@ function Match(){
   );
 }
 function Memory(){
-  const base = [{id:'phone',label:'📱'},{id:'usb',label:'💾'},{id:'router',label:'📶'}];
+  const base = BASE_MEMORY;
   const initial = useState(()=>shuffle([...base,...base].map((x,i)=>({...x, uid: x.id + '_' + i}))))[0];
   const [cards, setCards] = useState(initial);
   const [flipped, setFlipped] = useState([]);
@@ -424,7 +456,7 @@ function Guides(){
   );
 }
 
-/* Resources - expanded */
+/* Resources */
 function Resources(){
   const [query, setQuery] = useState('');
   const [filterTag, setFilterTag] = useState('');
@@ -558,13 +590,46 @@ function ArticleDetail({slug}){
   );
 }
 
-/* Comments compact */
+/* Comments compact (enhanced) */
 function CommentsCompact(){
-  const KEY = 'devicehub_comments_v2';
-  const [list, setList] = useState(()=>{ try{ return JSON.parse(localStorage.getItem(KEY)||'[]'); }catch(e){ return []; } });
+  const KEY = COMMENTS_KEY;
+  const [list, setList] = useState(()=>{ try{ const raw = localStorage.getItem(KEY); if(raw) return JSON.parse(raw); }catch(e){} return SEED_COMMENTS; });
   const [name, setName] = useState('');
   const [text, setText] = useState('');
-  function post(){ if(!name.trim()||!text.trim()){ alert('Nhập tên & nội dung'); return; } const c = { id: Date.now(), name: name.trim(), text: text.trim(), ts: Date.now() }; const arr = [c, ...list]; localStorage.setItem(KEY, JSON.stringify(arr)); setList(arr); setName(''); setText(''); }
+  const [likedMap, setLikedMap] = useState(()=>{ try{ return JSON.parse(localStorage.getItem(LIKES_KEY)||'{}'); }catch(e){ return {}; }});
+
+  useEffect(()=>{ localStorage.setItem(KEY, JSON.stringify(list)); }, [list]);
+  useEffect(()=>{ localStorage.setItem(LIKES_KEY, JSON.stringify(likedMap)); }, [likedMap]);
+
+  function post(){ if(!name.trim()||!text.trim()){ alert('Nhập tên & nội dung'); return; } const c = { id: 'c_' + Date.now(), name: name.trim(), avatarSeed: name.trim(), text: text.trim(), ts: Date.now(), likes:0, replies:[] }; const arr = [c, ...list]; localStorage.setItem(KEY, JSON.stringify(arr)); setList(arr); setName(''); setText(''); }
+  function exportJson(){ downloadFile('comments.json', JSON.stringify(list, null, 2), 'application/json'); }
+  function resetDemo(){ if(!confirm('Reset comments về mẫu demo?')) return; localStorage.removeItem(KEY); localStorage.removeItem(LIKES_KEY); setList(SEED_COMMENTS); setLikedMap({}); }
+
+  function toggleLike(id){
+    setLikedMap(prev=>{
+      const copy = {...prev};
+      if(copy[id]){ delete copy[id]; // remove like: decrement in list
+        setList(ls => updateLikeCount(ls, id, -1));
+      } else { copy[id] = true; setList(ls => updateLikeCount(ls, id, +1)); }
+      return copy;
+    });
+  }
+  function updateLikeCount(nodes, id, delta){
+    return nodes.map(n=> {
+      if(n.id === id) return {...n, likes: Math.max(0, (n.likes||0) + delta)};
+      if(n.replies && n.replies.length) return {...n, replies: updateLikeCount(n.replies, id, delta)};
+      return n;
+    });
+  }
+  function addReply(parentId, reply){
+    setList(prev=> prev.map(n=> addReplyTo(n, parentId, reply)));
+  }
+  function addReplyTo(node, parentId, reply){
+    if(node.id === parentId) return {...node, replies: [...(node.replies||[]), reply]};
+    if(node.replies && node.replies.length) return {...node, replies: node.replies.map(r=> addReplyTo(r, parentId, reply))};
+    return node;
+  }
+
   return (
     <div>
       <div className="grid md:grid-cols-3 gap-2">
@@ -573,16 +638,66 @@ function CommentsCompact(){
       </div>
       <div className="mt-2 flex gap-2">
         <button className="btn" onClick={post}>Gửi</button>
-        <button className="px-3 py-2 border rounded" onClick={()=>{ downloadFile('comments.json', JSON.stringify(list, null, 2), 'application/json'); }}>Export JSON</button>
+        <button className="px-3 py-2 border rounded" onClick={exportJson}>Export JSON</button>
+        <button className="px-3 py-2 border rounded" onClick={resetDemo}>Reset demo</button>
       </div>
       <div className="mt-3">
-        {list.slice(0,6).map(c=>(
-          <div key={c.id} className="border rounded p-3 mb-2">
-            <div className="font-semibold">{c.name}</div>
-            <div className="text-xs muted">{new Date(c.ts).toLocaleString()}</div>
-            <div className="mt-1">{c.text}</div>
-          </div>
+        {list.slice(0,999).map(c=>(
+          <CommentCard key={c.id} comment={c} onLike={toggleLike} liked={!!likedMap[c.id]} onReply={(reply)=>addReply(c.id, reply)} />
         ))}
+      </div>
+      <div className="mt-3 text-xs muted-2">Lưu ý: hiện tại comment lưu trên trình duyệt (localStorage). Để comment được chia sẻ nhiều người, cần backend (Firebase/Supabase) — mình có thể hướng dẫn tiếp.</div>
+    </div>
+  );
+}
+
+function CommentCard({comment, onLike, liked, onReply}){
+  const [showReply, setShowReply] = useState(false);
+  const [replyText, setReplyText] = useState('');
+  function submitReply(){
+    if(!replyText.trim()){ alert('Nhập nội dung trả lời'); return; }
+    const r = { id: comment.id + '_r_' + Date.now(), name: 'Bạn', avatarSeed: 'Bạn', text: replyText.trim(), ts: Date.now(), likes:0 };
+    onReply(r);
+    setReplyText(''); setShowReply(false);
+  }
+  return (
+    <div className="comment-box mb-3">
+      <div className="flex gap-3">
+        <img src={`https://api.dicebear.com/5.x/avataaars/svg?seed=${encodeURIComponent(comment.avatarSeed||comment.name)}&backgroundType=gradientLinear`} alt="av" className="avatar" />
+        <div style={{flex:1}}>
+          <div className="flex items-center gap-2">
+            <div className="font-semibold">{comment.name}</div>
+            <div className="muted text-xs">• {timeAgo(comment.ts)}</div>
+          </div>
+          <div className="mt-2">{comment.text}</div>
+          <div className="mt-3 flex gap-3 items-center text-sm">
+            <button className="px-2 py-1 border rounded interactive" onClick={()=>onLike(comment.id)}>{(comment.likes||0)} ❤️ Like</button>
+            <button className="px-2 py-1 border rounded interactive" onClick={()=>setShowReply(s=>!s)}>Trả lời</button>
+            <button className="px-2 py-1 border rounded interactive" onClick={()=>{ navigator.clipboard?.writeText(location.href + '#comment-' + comment.id); alert('Đã sao chép liên kết tới comment'); }}>Sao chép liên kết</button>
+          </div>
+
+          {showReply && (
+            <div className="mt-3 reply">
+              <div className="grid grid-cols-3 gap-2">
+                <input value={replyText} onChange={e=>setReplyText(e.target.value)} placeholder="Nội dung trả lời..." className="p-2 border rounded col-span-2" />
+                <div className="flex gap-2"><button className="btn" onClick={submitReply}>Gửi</button><button className="px-3 py-2 border rounded" onClick={()=>setShowReply(false)}>Hủy</button></div>
+              </div>
+            </div>
+          )}
+
+          <div className="mt-3 space-y-2">
+            {(comment.replies||[]).map(r=>(
+              <div key={r.id} className="flex items-start gap-3 reply">
+                <img src={`https://api.dicebear.com/5.x/avataaars/svg?seed=${encodeURIComponent(r.avatarSeed||r.name)}&backgroundType=gradientLinear`} alt="av" className="avatar-small" />
+                <div style={{flex:1}}>
+                  <div className="flex items-center gap-2"><div className="font-semibold text-sm">{r.name}</div><div className="muted text-xs">• {timeAgo(r.ts)}</div></div>
+                  <div className="text-sm mt-1">{r.text}</div>
+                  <div className="mt-2 text-sm"><button className="px-2 py-1 border rounded interactive" onClick={()=>onLike(r.id)}>{(r.likes||0)} ❤️</button></div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
     </div>
   );
