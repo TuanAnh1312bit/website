@@ -176,11 +176,14 @@ const QUIZ_DATA = [
 const MATCH_ITEMS = [ { id:'phone', name:'Điện thoại', hint:'Gọi, nhắn tin' }, { id:'router', name:'Router', hint:'Phát Wi-Fi' }, { id:'usb', name:'USB', hint:'Lưu trữ' } ];
 const BASE_MEMORY = [{id:'phone',label:'📱'},{id:'usb',label:'💾'},{id:'router',label:'📶'}];
 
-/* Seed comments to make page look alive (kept) */
+/* Seed comments (upgraded: more realistic + admin replies) */
 const SEED_COMMENTS = [
-  { id: 'c1', name: 'Ngọc', avatarSeed: 'Ngoc', text: 'Giao diện đẹp quá! Mượt, dễ dùng và rất trực quan. 👏', ts: Date.now()-1000*60*60*2, likes:3, replies:[{id:'c1_r1', name:'Tuấn Anh', avatarSeed:'TuanAnh', text:'Cảm ơn bạn! Team sẽ cố gắng cập nhật nhiều nội dung hơn 💜', ts: Date.now()-1000*60*30, likes:2}]},
-  { id: 'c2', name: 'Minh', avatarSeed: 'Minh', text: 'Các trò chơi nhỏ rất hữu ích để ôn lại kiến thức. Có thể thêm chế độ thách đấu không?', ts: Date.now()-1000*60*60*24, likes:5, replies:[{id:'c2_r1', name:'Quỳnh Anh', avatarSeed:'QuynhAnh', text:'Ý tưởng hay! Sẽ thảo luận với nhóm để làm chế độ PvP ✨', ts: Date.now()-1000*60*60*20, likes:1}]},
-  { id: 'c3', name: 'Lan', avatarSeed: 'Lan', text: 'Tài liệu rõ ràng, cảm ơn nhóm nhé!', ts: Date.now()-1000*60*60*3, likes:1, replies:[]}
+  { id: 'c1', name: 'Ngọc', avatarSeed: 'Ngoc', text: 'Website quá đẹp và mượt — giao diện chuyên nghiệp, mình rất ấn tượng. Nội dung dễ hiểu, team làm tốt quá! 👏👏', ts: Date.now()-1000*60*60*24, likes:12, replies:[{id:'c1_r1', name:'Tuấn Anh (Admin)', avatarSeed:'TuanAnh', text:'Cảm ơn Ngọc nhiều! Mình sẽ truyền ý kiến tới nhóm để tối ưu thêm trải nghiệm nhé 💜', ts: Date.now()-1000*60*60*20, likes:4}]},
+  { id: 'c2', name: 'Minh', avatarSeed: 'Minh', text: 'Trò chơi nhỏ rất hữu ích để ôn kiến thức. Gợi ý: thêm chế độ thách đấu (PvP) và bảng xếp hạng nhé.', ts: Date.now()-1000*60*60*36, likes:9, replies:[{id:'c2_r1', name:'Quỳnh Anh (Dev)', avatarSeed:'QuynhAnh', text:'Ý tưởng hay Minh! Team đang thảo luận về chế độ PvP — sẽ thử nghiệm chế độ này trong bản tới.', ts: Date.now()-1000*60*60*30, likes:3}]},
+  { id: 'c3', name: 'Lan', avatarSeed: 'Lan', text: 'Mình tải tài liệu về học, rõ ràng và dễ theo dõi. Cảm ơn nhóm rất nhiều!', ts: Date.now()-1000*60*60*12, likes:5, replies:[{id:'c3_r1', name:'Thùy Trang (Content)', avatarSeed:'ThuyTrang', text:'Rất vui khi bạn thấy hữu ích, Lan! Nếu cần tài liệu dạng slide mình sẽ bổ sung.', ts: Date.now()-1000*60*60*8, likes:2}]},
+  { id: 'c4', name: 'Hải', avatarSeed: 'Hai', text: 'Phần hướng dẫn Bluetooth rất chi tiết. Có một lỗi nhỏ khi truyền file qua Wi-Fi Direct, mình sẽ gửi log cho nhóm nếu cần.', ts: Date.now()-1000*60*60*60, likes:3, replies:[{id:'c4_r1', name:'Hà An (QA)', avatarSeed:'HaAn', text:'Cảm ơn Hải! Bạn gửi log giúp mình qua email hoặc mô tả trên đây, mình sẽ kiểm tra.', ts: Date.now()-1000*60*60*50, likes:1}]},
+  { id: 'c5', name: 'Nguyễn', avatarSeed: 'Nguyen', text: 'Giao diện nhẹ, load nhanh — thích nhất phần visual và button tương tác. Chúc nhóm phát triển mạnh!', ts: Date.now()-1000*60*60*6, likes:7, replies:[]},
+  { id: 'c6', name: 'Mai', avatarSeed: 'Mai', text: 'Mình có ý kiến: thêm tính năng dark mode tự động theo hệ thống thì tuyệt hơn.', ts: Date.now()-1000*60*30, likes:2, replies:[{id:'c6_r1', name:'Tuấn Anh (Admin)', avatarSeed:'TuanAnh', text:'Cảm ơn Mai — tính năng dark mode tự động đã có roadmap, sẽ ưu tiên thêm!', ts: Date.now()-1000*60*10, likes:2}]}
 ];
 
 const COMMENTS_KEY = 'devicehub_comments_v3';
@@ -287,7 +290,7 @@ function Home({nav}){
   );
 }
 
-/* Games */
+/* Games (unchanged) */
 function Games(){
   return (
     <div>
@@ -385,8 +388,7 @@ function Quiz(){
       )}
     </div>
   );
-}
-
+} 
 function Match(){
   const [left, setLeft] = useState(()=>shuffle(MATCH_ITEMS));
   const [right, setRight] = useState(()=>shuffle(MATCH_ITEMS.map(i=>({...i, face: i.hint}))));
@@ -590,7 +592,7 @@ function ArticleDetail({slug}){
   );
 }
 
-/* Comments compact (enhanced) */
+/* Comments compact (enhanced) — updated: no Export/Reset buttons */
 function CommentsCompact(){
   const KEY = COMMENTS_KEY;
   const [list, setList] = useState(()=>{ try{ const raw = localStorage.getItem(KEY); if(raw) return JSON.parse(raw); }catch(e){} return SEED_COMMENTS; });
@@ -602,15 +604,11 @@ function CommentsCompact(){
   useEffect(()=>{ localStorage.setItem(LIKES_KEY, JSON.stringify(likedMap)); }, [likedMap]);
 
   function post(){ if(!name.trim()||!text.trim()){ alert('Nhập tên & nội dung'); return; } const c = { id: 'c_' + Date.now(), name: name.trim(), avatarSeed: name.trim(), text: text.trim(), ts: Date.now(), likes:0, replies:[] }; const arr = [c, ...list]; localStorage.setItem(KEY, JSON.stringify(arr)); setList(arr); setName(''); setText(''); }
-  function exportJson(){ downloadFile('comments.json', JSON.stringify(list, null, 2), 'application/json'); }
-  function resetDemo(){ if(!confirm('Reset comments về mẫu demo?')) return; localStorage.removeItem(KEY); localStorage.removeItem(LIKES_KEY); setList(SEED_COMMENTS); setLikedMap({}); }
-
   function toggleLike(id){
     setLikedMap(prev=>{
       const copy = {...prev};
-      if(copy[id]){ delete copy[id]; // remove like: decrement in list
-        setList(ls => updateLikeCount(ls, id, -1));
-      } else { copy[id] = true; setList(ls => updateLikeCount(ls, id, +1)); }
+      if(copy[id]){ delete copy[id]; setList(ls=> updateLikeCount(ls, id, -1)); }
+      else { copy[id]=true; setList(ls=> updateLikeCount(ls, id, +1)); }
       return copy;
     });
   }
@@ -621,14 +619,8 @@ function CommentsCompact(){
       return n;
     });
   }
-  function addReply(parentId, reply){
-    setList(prev=> prev.map(n=> addReplyTo(n, parentId, reply)));
-  }
-  function addReplyTo(node, parentId, reply){
-    if(node.id === parentId) return {...node, replies: [...(node.replies||[]), reply]};
-    if(node.replies && node.replies.length) return {...node, replies: node.replies.map(r=> addReplyTo(r, parentId, reply))};
-    return node;
-  }
+  function addReply(parentId, reply){ setList(prev=> prev.map(n=> addReplyTo(n, parentId, reply))); }
+  function addReplyTo(node, parentId, reply){ if(node.id === parentId) return {...node, replies: [...(node.replies||[]), reply]}; if(node.replies && node.replies.length) return {...node, replies: node.replies.map(r=> addReplyTo(r, parentId, reply))}; return node; }
 
   return (
     <div>
@@ -638,12 +630,10 @@ function CommentsCompact(){
       </div>
       <div className="mt-2 flex gap-2">
         <button className="btn" onClick={post}>Gửi</button>
-        <button className="px-3 py-2 border rounded" onClick={exportJson}>Export JSON</button>
-        <button className="px-3 py-2 border rounded" onClick={resetDemo}>Reset demo</button>
       </div>
       <div className="mt-3">
         {list.slice(0,999).map(c=>(
-          <CommentCard key={c.id} comment={c} onLike={toggleLike} liked={!!likedMap[c.id]} onReply={(reply)=>addReply(c.id, reply)} />
+          <CommentCard key={c.id} comment={c} onLike={(id)=>toggleLike(id)} liked={!!likedMap[c.id]} onReply={(reply)=>addReply(c.id, reply)} />
         ))}
       </div>
       <div className="mt-3 text-xs muted-2">Lưu ý: hiện tại comment lưu trên trình duyệt (localStorage). Để comment được chia sẻ nhiều người, cần backend (Firebase/Supabase) — mình có thể hướng dẫn tiếp.</div>
